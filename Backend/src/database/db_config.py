@@ -10,9 +10,7 @@ load_dotenv()
 
 class AsyncDatabaseSession:
     """
-    Thin async DB session wrapper, same pattern as minestone's
-    AsyncDatabaseSession: a single shared session whose attributes
-    (execute/add/commit/refresh, etc.) are proxied via __getattr__.
+    Thin async DB session wrapper.
     """
 
     def __init__(self):
@@ -24,8 +22,14 @@ class AsyncDatabaseSession:
 
     def init(self):
         connect_args = {}
+
         if Config.DB_CONFIG.startswith("sqlite"):
             connect_args = {"check_same_thread": False}
+
+        elif Config.DB_CONFIG.startswith("postgresql+asyncpg://"):
+            # asyncpg expects SSL configuration through "ssl",
+            # not the libpq-style "sslmode" connection argument.
+            connect_args = {"ssl": True}
 
         self._engine = create_async_engine(
             Config.DB_CONFIG,
@@ -33,8 +37,11 @@ class AsyncDatabaseSession:
             echo=False,
             connect_args=connect_args,
         )
+
         self._session = sessionmaker(
-            self._engine, expire_on_commit=False, class_=AsyncSession
+            self._engine,
+            expire_on_commit=False,
+            class_=AsyncSession
         )()
 
     async def create_all(self):
