@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine import make_url
+from sqlalchemy.exc import DBAPIError, InterfaceError
 from dotenv import load_dotenv
 
 from src.database.config import Config
@@ -11,7 +12,8 @@ load_dotenv()
 
 class AsyncDatabaseSession:
     """
-    Thin async DB session wrapper.
+    Async database session wrapper.
+    Designed for Neon PostgreSQL with connection recovery.
     """
 
     def __init__(self):
@@ -25,39 +27,90 @@ class AsyncDatabaseSession:
         connect_args = {}
         db_url = Config.DB_CONFIG
 
+        # SQLite
         if db_url.startswith("sqlite"):
-            connect_args = {"check_same_thread": False}
+            connect_args = {
+                "check_same_thread": False
+            }
 
+        # PostgreSQL + asyncpg
         elif db_url.startswith("postgresql+asyncpg://"):
-            # Remove libpq-style sslmode from the URL because
-            # asyncpg does not accept sslmode as a connection argument.
+            # asyncpg does not accept libpq-style sslmode
+            # or channel_binding parameters.
             db_url = make_url(db_url).difference_update_query(
-            ["sslmode", "channel_binding"]
-)
+                ["sslmode", "channel_binding"]
+            )
 
-            # asyncpg uses "ssl" instead.
-            connect_args = {"ssl": True}
+            # asyncpg uses ssl=True
+            connect_args = {
+                "ssl": True
+            }
 
         self._engine = create_async_engine(
             db_url,
             future=True,
             echo=False,
+
+            # Check stale connections before using them.
+            pool_pre_ping=True,
+
+            # Recycle connections periodically.
+            # Helps with cloud PostgreSQL connections.
+            pool_recycle=300,
+
             connect_args=connect_args,
         )
 
         self._session = sessionmaker(
-            self._engine,
+            bind=self._engine,
             expire_on_commit=False,
-            class_=AsyncSession
+            class_=AsyncSession,
         )()
 
+    async def execute(self, statement, *args, **kwargs):
+        """
+        Execute a query and recover once if the current
+        database connection has been closed.
+        """
+        try:
+            return await self._session.execute(
+                statement,
+                *args,
+                **kwargs,
+            )
+
+        except (InterfaceError, DBAPIError):
+            # Clear the failed transaction/session state.
+            try:
+                await self._session.rollback()
+            except Exception:
+                pass
+
+            # Retry the query using a fresh connection.
+            return await self._session.execute(
+                statement,
+                *args,
+                **kwargs,
+            )
+
     async def create_all(self):
+        """
+        Create all database tables if they do not already exist.
+        """
         async with self._engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
     async def close(self):
+        """
+        Properly close the session and database engine.
+        """
         if self._session is not None:
             await self._session.close()
+            self._session = None
+
+        if self._engine is not None:
+            await self._engine.dispose()
+            self._engine = None
 
 
 db = AsyncDatabaseSession()
