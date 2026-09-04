@@ -31,7 +31,9 @@ class AsyncDatabaseSession:
         elif db_url.startswith("postgresql+asyncpg://"):
             # Remove libpq-style sslmode from the URL because
             # asyncpg does not accept sslmode as a connection argument.
-            db_url = make_url(db_url).difference_update_query(["sslmode"])
+            db_url = make_url(db_url).difference_update_query(
+            ["sslmode", "channel_binding"]
+)
 
             # asyncpg uses "ssl" instead.
             connect_args = {"ssl": True}
