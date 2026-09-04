@@ -41,12 +41,19 @@ def init_app():
         allow_headers=["Content-Type", "Authorization"],
     )
 
+    @app.on_event("startup")
+    async def startup():
+        await db.create_all()
+
     @app.on_event("shutdown")
     async def shutdown():
         await db.close()
 
-
-    app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
+    app.mount(
+        "/uploads",
+        StaticFiles(directory=str(UPLOAD_DIR)),
+        name="uploads",
+    )
 
     app.include_router(auth.router)
     app.include_router(report.report_router)
@@ -68,5 +75,10 @@ def result():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("src.main:app", host="0.0.0.0", port=8000, reload=True)
 
+    uvicorn.run(
+        "src.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+    )
