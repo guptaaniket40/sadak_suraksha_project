@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../components/AuthContext";
 import Footer from "../components/Footer";
+import { API_BASE_URL, getImageUrl } from "../config/api";
 
 const statusOptions = [
   "Submitted",
@@ -51,7 +52,7 @@ const Complaints = () => {
     const fetchReports = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:5000/api/complaints", {
+        const res = await axios.get(`${API_BASE_URL}/api/complaints`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -107,7 +108,7 @@ const Complaints = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.patch(
-        `http://localhost:5000/api/complaints/${reportId}/status`,
+        `${API_BASE_URL}/api/complaints/${reportId}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -127,7 +128,7 @@ const Complaints = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.patch(
-        `http://localhost:5000/api/complaints/${reportId}/reject`,
+        `${API_BASE_URL}/api/complaints/${reportId}/reject`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -149,7 +150,7 @@ const Complaints = () => {
       formData.append("adminImage", file);
 
       const res = await axios.post(
-        `http://localhost:5000/api/complaints/${reportId}/admin-image`,
+        `${API_BASE_URL}/api/complaints/${reportId}/admin-image`,
         formData,
         {
           headers: {
@@ -182,7 +183,7 @@ const Complaints = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.patch(
-        `http://localhost:5000/api/complaints/${reportId}/admin-remarks`,
+        `${API_BASE_URL}/api/complaints/${reportId}/admin-remarks`,
         { remarks: remarks[reportId] },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -198,30 +199,32 @@ const Complaints = () => {
 
   if (!isAuthenticated || userRole !== "admin") {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center px-4">
-        <div className="p-8 rounded-3xl bg-slate-800 border border-slate-700 text-center max-w-sm">
-          <ShieldAlert size={32} className="text-red-400 mx-auto mb-3" />
-          <h2 className="text-xl font-bold text-white mb-2">Access Denied</h2>
-          <p className="text-xs text-slate-400">Admins only.</p>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center px-4 transition-colors duration-200">
+        <div className="p-8 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center max-w-sm shadow-xl space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-red-500/20 text-red-500 dark:text-red-400 mx-auto flex items-center justify-center">
+            <ShieldAlert size={24} />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Access Denied</h2>
+          <p className="text-xs text-slate-600 dark:text-slate-400">Admins only.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200">
       
       <div className="pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
         
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold mb-2">
               <ShieldAlert size={14} />
               <span>Pending Action Queue</span>
             </div>
-            <h1 className="text-3xl font-black text-white">Active Incident Complaints</h1>
-            <p className="text-sm text-slate-400 mt-1">
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white">Active Incident Complaints</h1>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
               Verify road damage reports, assign crews, upload proof, and update resolution states.
             </p>
           </div>
@@ -229,13 +232,13 @@ const Complaints = () => {
 
         {/* Feedback banners */}
         {error && (
-          <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm flex items-center gap-2.5">
+          <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 text-sm flex items-center gap-2.5">
             <AlertTriangle size={18} className="shrink-0" />
             <span>{error}</span>
           </div>
         )}
         {successMsg && (
-          <div className="mb-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm flex items-center gap-2.5 animate-in fade-in duration-200">
+          <div className="mb-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-sm flex items-center gap-2.5 animate-in fade-in duration-200">
             <CheckCircle2 size={18} className="shrink-0" />
             <span>{successMsg}</span>
           </div>
@@ -244,25 +247,25 @@ const Complaints = () => {
         {/* Controls */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
           <div className="relative flex-1 w-full">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search by title, location, citizen, or category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-950 text-white placeholder-slate-400 text-sm pl-11 pr-4 py-3.5 rounded-2xl border border-slate-700/80 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
+              className="w-full bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-slate-400 text-sm pl-11 pr-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/80 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-xs"
             />
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1">
             {["All", "Submitted", "Under Review", "In Progress"].map((st) => (
               <button
                 key={st}
                 onClick={() => setSelectedStatus(st)}
                 className={`px-3.5 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                   selectedStatus === st
-                    ? "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-md"
-                    : "bg-slate-950/60 text-slate-400 border-slate-800 hover:bg-slate-800"
+                    ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40 shadow-sm"
+                    : "bg-white dark:bg-slate-950/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 {st}
@@ -275,14 +278,14 @@ const Complaints = () => {
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((n) => (
-              <div key={n} className="p-8 rounded-3xl bg-slate-800/40 border border-slate-800 animate-pulse h-64"></div>
+              <div key={n} className="p-8 rounded-3xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 animate-pulse h-64"></div>
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="p-12 text-center rounded-3xl bg-slate-900/60 border border-slate-800 max-w-md mx-auto space-y-3">
+          <div className="p-12 text-center rounded-3xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 max-w-md mx-auto space-y-3 shadow-sm">
             <div className="text-4xl">🎉</div>
-            <h3 className="font-bold text-lg text-white">All Caught Up!</h3>
-            <p className="text-xs text-slate-400">No active complaints pending action in this category.</p>
+            <h3 className="font-bold text-lg text-slate-900 dark:text-white">All Caught Up!</h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400">No active complaints pending action in this category.</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -291,27 +294,27 @@ const Complaints = () => {
               return (
                 <div
                   key={repId}
-                  className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 shadow-xl space-y-6 transition-all"
+                  className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm dark:shadow-xl space-y-6 transition-all"
                 >
                   {/* Card Header */}
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div className="space-y-1.5">
                       <div className="flex flex-wrap items-center gap-2.5">
-                        <span className="px-2.5 py-0.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold">
+                        <span className="px-2.5 py-0.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-xs font-semibold">
                           {report.category}
                         </span>
-                        <span className="px-2.5 py-0.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold">
+                        <span className="px-2.5 py-0.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold">
                           Priority: {report.priority}
                         </span>
-                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                        <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                           <User size={13} />
                           <span>{report.user?.username || "Citizen"}</span>
                         </span>
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-slate-400 dark:text-slate-500">
                           • {new Date(report.created_at || report.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <h3 className="text-xl font-bold text-white">{report.title}</h3>
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white">{report.title}</h3>
                     </div>
 
                     {/* Status Select & Reject */}
@@ -319,7 +322,7 @@ const Complaints = () => {
                       <select
                         value={report.status}
                         onChange={(e) => handleStatusChange(repId, e.target.value)}
-                        className="bg-slate-950 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-500 cursor-pointer"
+                        className="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-500 cursor-pointer shadow-xs"
                       >
                         {statusOptions
                           .filter((st) => st !== "Rejected")
@@ -332,17 +335,17 @@ const Complaints = () => {
 
                       <button
                         onClick={() => handleReject(repId)}
-                        className="px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-semibold transition-colors cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30 text-xs font-semibold transition-colors cursor-pointer"
                       >
                         Reject
                       </button>
                     </div>
                   </div>
 
-                  <p className="text-sm text-slate-300 leading-relaxed">{report.description}</p>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{report.description}</p>
 
-                  <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-                    <MapPin size={15} className="text-orange-400 shrink-0" />
+                  <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <MapPin size={15} className="text-orange-500 shrink-0" />
                     <span>{report.location}</span>
                   </div>
 
@@ -350,40 +353,32 @@ const Complaints = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                     {/* Citizen Photo */}
                     <div className="space-y-1.5">
-                      <span className="text-xs font-semibold text-slate-400">📸 Citizen Reported Photo</span>
-                      <div className="h-44 rounded-2xl overflow-hidden bg-slate-950 border border-slate-800">
+                      <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">📸 Citizen Reported Photo</span>
+                      <div className="h-44 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                         {report.image_url || report.imageUrl ? (
                           <img
-                            src={
-                              (report.image_url || report.imageUrl).startsWith("http")
-                                ? (report.image_url || report.imageUrl)
-                                : `http://localhost:5000${report.image_url || report.imageUrl}`
-                            }
+                            src={getImageUrl(report.image_url || report.imageUrl)}
                             alt="Reported"
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs text-slate-600">No Photo Provided</div>
+                          <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 dark:text-slate-600">No Photo Provided</div>
                         )}
                       </div>
                     </div>
 
                     {/* Admin Resolution Proof Upload */}
                     <div className="space-y-1.5">
-                      <span className="text-xs font-semibold text-emerald-400">✅ Authority Proof Photo</span>
-                      <div className="h-44 rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 flex flex-col items-center justify-center relative p-3">
+                      <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">✅ Authority Proof Photo</span>
+                      <div className="h-44 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center relative p-3">
                         {report.admin_image_url || report.adminImageUrl ? (
                           <img
-                            src={
-                              (report.admin_image_url || report.adminImageUrl).startsWith("http")
-                                ? (report.admin_image_url || report.adminImageUrl)
-                                : `http://localhost:5000${report.admin_image_url || report.adminImageUrl}`
-                            }
+                            src={getImageUrl(report.admin_image_url || report.adminImageUrl)}
                             alt="Proof"
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <label className="w-full h-full border border-dashed border-slate-700 hover:border-emerald-500 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors p-2">
+                          <label className="w-full h-full border border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors p-2 bg-white/50 dark:bg-slate-950/50">
                             <input
                               type="file"
                               accept="image/*"
@@ -396,8 +391,8 @@ const Complaints = () => {
                               }}
                               className="hidden"
                             />
-                            <Camera size={24} className="text-slate-500" />
-                            <span className="text-xs text-slate-400 font-medium">
+                            <Camera size={24} className="text-slate-400 dark:text-slate-500" />
+                            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
                               {uploadingReportId === repId ? "Uploading..." : "Upload After-Fix Proof"}
                             </span>
                           </label>
@@ -408,7 +403,7 @@ const Complaints = () => {
 
                   {/* Remarks Editor */}
                   <div className="space-y-2 pt-2">
-                    <label className="block text-xs font-semibold text-slate-300">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                       Official Remarks / Notes for Citizen:
                     </label>
                     <div className="flex gap-2">
@@ -416,7 +411,7 @@ const Complaints = () => {
                         rows={2}
                         value={remarks[repId] || ""}
                         onChange={(e) => setRemarks({ ...remarks, [repId]: e.target.value })}
-                        className="flex-1 bg-slate-950 text-white placeholder-slate-500 text-xs p-3 rounded-2xl border border-slate-700 focus:outline-none focus:border-amber-500 resize-none"
+                        className="flex-1 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs p-3 rounded-2xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-amber-500 resize-none"
                         placeholder="e.g. Patchwork completed by Ward 4 maintenance team on 28th Feb..."
                       />
                       <button

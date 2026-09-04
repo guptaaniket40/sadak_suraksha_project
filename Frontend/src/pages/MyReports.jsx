@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../components/AuthContext";
 import UserFooter from "../components/UserFooter";
+import { API_BASE_URL, getImageUrl } from "../config/api";
 
 const STATUS_BADGES = {
   Submitted: { bg: "bg-slate-700/60 text-slate-300 border-slate-600", dot: "bg-slate-400" },
@@ -50,7 +51,7 @@ const MyReports = () => {
     const fetchReports = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:5000/api/myReport", {
+        const res = await axios.get(`${API_BASE_URL}/api/myReport`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -271,11 +272,7 @@ const MyReports = () => {
                         </div>
                         <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 h-44 group relative">
                           <img
-                            src={
-                              (report.image_url || report.imageUrl).startsWith("http")
-                                ? (report.image_url || report.imageUrl)
-                                : `http://localhost:5000${report.image_url || report.imageUrl}`
-                            }
+                            src={getImageUrl(report.image_url || report.imageUrl)}
                             alt="Citizen submitted hazard"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
@@ -292,11 +289,7 @@ const MyReports = () => {
                         </div>
                         <div className="rounded-2xl overflow-hidden border border-emerald-500/30 bg-slate-100 dark:bg-slate-950 h-44 group relative">
                           <img
-                            src={
-                              (report.admin_image_url || report.adminImageUrl).startsWith("http")
-                                ? (report.admin_image_url || report.adminImageUrl)
-                                : `http://localhost:5000${report.admin_image_url || report.adminImageUrl}`
-                            }
+                            src={getImageUrl(report.admin_image_url || report.adminImageUrl)}
                             alt="Authority resolution proof"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />

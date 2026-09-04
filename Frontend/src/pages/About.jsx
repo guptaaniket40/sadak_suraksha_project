@@ -48,21 +48,21 @@ const PILLARS = [
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200">
       
       <div className="pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full">
         
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold">
             <Shield size={14} />
             <span>Our Mission & Vision</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
             Safer Indian Roads Through Citizen Action
           </h1>
-          <p className="text-slate-300 text-base sm:text-lg leading-relaxed">
-            <span className="text-orange-400 font-semibold">Sadak Suraksha</span> is India's next-generation crowdsourced road safety infrastructure platform, connecting commuters directly with local municipal bodies.
+          <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed">
+            <span className="text-orange-500 dark:text-orange-400 font-semibold">Sadak Suraksha</span> is India's next-generation crowdsourced road safety infrastructure platform, connecting commuters directly with local municipal bodies.
           </p>
         </div>
 
@@ -73,14 +73,14 @@ export default function About() {
             return (
               <div 
                 key={idx}
-                className="p-7 rounded-3xl bg-slate-900/90 border border-slate-800 hover:border-blue-500/40 shadow-xl hover:-translate-y-1 transition-all duration-200 group flex flex-col justify-between"
+                className="p-7 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-blue-500/40 shadow-sm dark:shadow-xl hover:-translate-y-1 transition-all duration-200 group flex flex-col justify-between"
               >
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mb-5 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-5 group-hover:bg-blue-600 group-hover:text-white transition-all">
                     <Icon size={22} />
                   </div>
-                  <h3 className="font-bold text-lg text-white mb-2">{p.title}</h3>
-                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{p.desc}</p>
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">{p.title}</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{p.desc}</p>
                 </div>
               </div>
             );
@@ -88,12 +88,12 @@ export default function About() {
         </div>
 
         {/* Commitment Banner */}
-        <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-700 shadow-2xl text-center space-y-4 max-w-3xl mx-auto">
+        <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 border border-blue-700/40 shadow-xl text-center space-y-4 max-w-3xl mx-auto text-white">
           <div className="w-12 h-12 mx-auto rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center">
             <Heart size={24} />
           </div>
           <h2 className="text-2xl font-bold text-white">Our Pledge to Commuters</h2>
-          <p className="text-sm text-slate-300 leading-relaxed">
+          <p className="text-sm text-blue-100 leading-relaxed">
             Every year, thousands of road accidents in India are caused by unattended potholes and damaged road infrastructure. By enabling rapid reporting and verified tracking, we aim to eliminate hazardous blindspots from our streets.
           </p>
         </div>

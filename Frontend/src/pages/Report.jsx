@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../components/AuthContext";
 import UserFooter from "../components/UserFooter";
+import { API_BASE_URL } from "../config/api";
 
 const CATEGORIES = [
   { id: "Pothole", label: "Pothole", icon: "🕳️" },
@@ -104,7 +105,7 @@ const Report = () => {
       formData.append("priority", priority);
       if (image) formData.append("image", image);
 
-      const res = await axios.post("http://localhost:5000/api/report", formData, {
+      const res = await axios.post(`${API_BASE_URL}/api/report`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

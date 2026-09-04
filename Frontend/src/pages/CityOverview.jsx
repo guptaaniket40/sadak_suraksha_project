@@ -13,7 +13,9 @@ import {
   Layers,
   Image as ImageIcon
 } from "lucide-react";
+import { useAuth } from "../components/AuthContext";
 import UserFooter from "../components/UserFooter";
+import { API_BASE_URL, getImageUrl } from "../config/api";
 
 const CityOverview = () => {
   const [reports, setReports] = useState([]);
@@ -25,7 +27,7 @@ const CityOverview = () => {
   useEffect(() => {
     const fetchResolvedReports = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/resolved-reports/onlyresolved");
+        const res = await axios.get(`${API_BASE_URL}/api/resolved-reports/onlyresolved`);
         const list = res.data.data?.reports || [];
         setReports(list);
         setFiltered(list);
@@ -142,51 +144,43 @@ const CityOverview = () => {
                 </div>
 
                 {/* Images Comparison Grid */}
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <div className="space-y-1">
-                    <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1">
-                      <ImageIcon size={12} />
-                      <span>Before Report</span>
-                    </span>
-                    <div className="h-32 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-                      {report.image_url || report.imageUrl ? (
-                        <img
-                          src={
-                            (report.image_url || report.imageUrl).startsWith("http")
-                              ? (report.image_url || report.imageUrl)
-                              : `http://localhost:5000${report.image_url || report.imageUrl}`
-                          }
-                          alt="Before"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 dark:text-slate-600">No Photo</div>
-                      )}
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                        <ImageIcon size={12} />
+                        <span>Before Report</span>
+                      </span>
+                      <div className="h-32 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                        {report.image_url || report.imageUrl ? (
+                          <img
+                            src={getImageUrl(report.image_url || report.imageUrl)}
+                            alt="Before"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 dark:text-slate-600">No Photo</div>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="space-y-1">
-                    <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                      <CheckCircle2 size={12} />
-                      <span>Fixed by Authority</span>
-                    </span>
-                    <div className="h-32 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-emerald-500/30">
-                      {(report.admin_image_url || report.adminImageUrl) ? (
-                        <img
-                          src={
-                            (report.admin_image_url || report.adminImageUrl).startsWith("http")
-                              ? (report.admin_image_url || report.adminImageUrl)
-                              : `http://localhost:5000${report.admin_image_url || report.adminImageUrl}`
-                          }
-                          alt="Fixed by authority"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 dark:text-slate-600">Proof Pending</div>
-                      )}
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 size={12} />
+                        <span>Fixed by Authority</span>
+                      </span>
+                      <div className="h-32 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-emerald-500/30">
+                        {(report.admin_image_url || report.adminImageUrl) ? (
+                          <img
+                            src={getImageUrl(report.admin_image_url || report.adminImageUrl)}
+                            alt="Fixed by authority"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 dark:text-slate-600">Proof Pending</div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
                 {/* Remarks */}
                 {(report.admin_remarks || report.adminRemarks) && (

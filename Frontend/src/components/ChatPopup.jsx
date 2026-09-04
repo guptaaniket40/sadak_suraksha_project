@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { Bot, User, Send, X, Sparkles, AlertCircle, RefreshCw } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 const QUICK_SUGGESTIONS = [
   "🚧 Pothole complaint kaise karein?",
@@ -42,7 +43,7 @@ const ChatPopup = ({ isOpen = true, onClose }) => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/chatbot/message', {
+      const response = await axios.post(`${API_BASE_URL}/api/chatbot/message`, {
         message: query.trim(),
         sessionId: 'sadaksuraksha-ui'
       }, {

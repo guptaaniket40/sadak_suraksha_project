@@ -26,9 +26,9 @@ Converted to the `minestone` architecture pattern:
 cd Backend
 cp .env.example .env        # edit DATABASE_URL, JWT_SECRET, OPENROUTER_API_KEY as needed
 pip install -r src/requirements.txt
-uvicorn src.main:app --host 127.0.0.1 --port 5000
+uvicorn src.main:app --host 127.0.0.1 --port 8000
 ```
-Server starts at `http://localhost:5000`, docs at `/docs`.
+Server starts at `http://localhost:8000`, docs at `/docs`.
 
 ## Frontend
 
