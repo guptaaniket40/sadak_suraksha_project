@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.engine import make_url
 from dotenv import load_dotenv
 
 from src.database.config import Config
@@ -22,17 +23,21 @@ class AsyncDatabaseSession:
 
     def init(self):
         connect_args = {}
+        db_url = Config.DB_CONFIG
 
-        if Config.DB_CONFIG.startswith("sqlite"):
+        if db_url.startswith("sqlite"):
             connect_args = {"check_same_thread": False}
 
-        elif Config.DB_CONFIG.startswith("postgresql+asyncpg://"):
-            # asyncpg expects SSL configuration through "ssl",
-            # not the libpq-style "sslmode" connection argument.
+        elif db_url.startswith("postgresql+asyncpg://"):
+            # Remove libpq-style sslmode from the URL because
+            # asyncpg does not accept sslmode as a connection argument.
+            db_url = make_url(db_url).difference_update_query(["sslmode"])
+
+            # asyncpg uses "ssl" instead.
             connect_args = {"ssl": True}
 
         self._engine = create_async_engine(
-            Config.DB_CONFIG,
+            db_url,
             future=True,
             echo=False,
             connect_args=connect_args,
