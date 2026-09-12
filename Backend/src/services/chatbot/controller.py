@@ -24,11 +24,10 @@ class ChatbotController:
             return ""
 
         models = [
-            "gemini-flash-latest",
-            "gemini-3.7-flash",
             "gemini-3.6-flash",
-            "gemini-2.5-flash",
-            "gemini-flash-lite-latest",
+            "gemini-3.5-flash",
+            "gemini-3.1-flash-lite",
+            "gemini-3.7-flash",
         ]
         for model in models:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={clean_key}"
@@ -46,7 +45,7 @@ class ChatbotController:
                 }
             }
             try:
-                async with httpx.AsyncClient(timeout=15.0) as client:
+                async with httpx.AsyncClient(timeout=4.5) as client:
                     resp = await client.post(url, json=payload)
                     if resp.status_code == 200:
                         data = resp.json()

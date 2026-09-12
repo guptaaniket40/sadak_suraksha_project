@@ -48,7 +48,7 @@ const ChatPopup = ({ isOpen = true, onClose }) => {
         sessionId: 'sadaksuraksha-ui'
       }, {
         headers: { 'Content-Type': 'application/json' },
-        timeout: 15000
+        timeout: 30000
       });
 
       const botReply = response.data.data?.response || "Sorry, I couldn't process your request right now.";
