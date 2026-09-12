@@ -1,3 +1,4 @@
+import os
 import re
 import httpx
 from fastapi import status
@@ -22,7 +23,13 @@ class ChatbotController:
         if not clean_key:
             return ""
 
-        models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-pro"]
+        models = [
+            "gemini-flash-latest",
+            "gemini-3.7-flash",
+            "gemini-3.6-flash",
+            "gemini-2.5-flash",
+            "gemini-flash-lite-latest",
+        ]
         for model in models:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={clean_key}"
             payload = {
@@ -99,28 +106,81 @@ class ChatbotController:
         return ""
 
     @staticmethod
+    def _get_fallback_knowledge_response(message: str) -> str:
+        msg = message.lower().strip()
+
+        # Pothole or reporting complaint
+        if any(k in msg for k in ["pothole", "gaddha", "complaint", "report", "kaise karein", "how to report", "damage", "sadak", "road"]):
+            return (
+                "📍 **Pothole / Road Damage Complaint Kaise Karein:**\n\n"
+                "1. **'Report Hazard'** tab par click karein.\n"
+                "2. Sadak samasya ki photo upload karein.\n"
+                "3. Location / GPS auto-detect hone dein ya manual address enter karein.\n"
+                "4. Category select karein (e.g., Pothole, Broken Signal, Waterlogging) aur **Submit** par click karein!\n\n"
+                "Aapki complaint turant local authority dashboard par chali jayegi."
+            )
+
+        # Status tracking
+        if any(k in msg for k in ["status", "track", "check", "kahan pahuchi", "my reports", "meri report"]):
+            return (
+                "📊 **Report Status Check Karne Ka Tarika:**\n\n"
+                "1. Website ke top navigation menu me **'My Reports'** par click karein.\n"
+                "2. Wahan aapko aapki sabhi complaints ka live stage status dikhega:\n"
+                "   - 🟡 **Submitted** (Aapki complaint darz ho gayi hai)\n"
+                "   - 🔵 **Under Review** (Authority janch kar rahi hai)\n"
+                "   - 🟠 **In Progress** (Kam shuru ho chuka hai)\n"
+                "   - 🟢 **Resolved** (Samasya theek ho chuki hai)\n"
+                "3. Resolve hone par authority ki proof photo aur remarks bhi wahan milenge."
+            )
+
+        # Emergency helplines
+        if any(k in msg for k in ["emergency", "helpline", "number", "police", "ambulance", "accident"]):
+            return (
+                "🚨 **National Road Safety & Emergency Helpline Numbers (India):**\n\n"
+                "- **National Highway Emergency:** 1033\n"
+                "- **All-in-One Emergency Helpline:** 112\n"
+                "- **Ambulance Service:** 108 / 102\n"
+                "- **Traffic Police Helpline:** 1095 / 1073\n"
+                "- **Women Safety Helpline:** 1091"
+            )
+
+        # General Greetings
+        if any(k in msg for k in ["hi", "hello", "namaste", "hey", "help", "kya kar sakte"]):
+            return (
+                "Namaste! Main **Sadak Suraksha AI Assistant** hoon. 🙏\n\n"
+                "Main aapki in cheezon mein madad kar sakta hoon:\n"
+                "• Sadak ke gaddhe ya damage report karna\n"
+                "• Apni complaint ka live status track karna\n"
+                "• Traffic signal aur road safety helplines ki jaankari lena\n\n"
+                "Aap apna sawal pooch sakte hain!"
+            )
+
+        return (
+            "Sadak Suraksha par aap kisi bhi sadak samasya, pothole, ya broken traffic signal ki complaint darz kar sakte hain. "
+            "Report karne ke liye 'Report Hazard' par jayein aur status check karne ke liye 'My Reports' open karein."
+        )
+
+    @staticmethod
     async def send_message(payload: ChatMessageSerializer):
         if not payload.message or not payload.message.strip():
             return response_structure(status.HTTP_400_BAD_REQUEST, False, ChatbotConstants.MESSAGE_REQUIRED)
 
+        gemini_key = os.getenv("GEMINI_API_KEY", "") or Config.GEMINI_API_KEY
+        openrouter_key = os.getenv("OPENROUTER_API_KEY", "") or Config.OPENROUTER_API_KEY
+
         # 1. Prioritize Google Gemini API
-        if Config.GEMINI_API_KEY:
-            gemini_reply = await ChatbotController._call_gemini(payload.message, Config.GEMINI_API_KEY)
+        if gemini_key:
+            gemini_reply = await ChatbotController._call_gemini(payload.message, gemini_key)
             if gemini_reply:
                 return response_structure(status.HTTP_200_OK, True, "OK", {"response": gemini_reply})
 
         # 2. Fallback to OpenRouter
-        if Config.OPENROUTER_API_KEY:
-            openrouter_reply = await ChatbotController._call_openrouter(payload.message, Config.OPENROUTER_API_KEY)
+        if openrouter_key:
+            openrouter_reply = await ChatbotController._call_openrouter(payload.message, openrouter_key)
             if openrouter_reply:
                 return response_structure(status.HTTP_200_OK, True, "OK", {"response": openrouter_reply})
 
-        if not Config.GEMINI_API_KEY and not Config.OPENROUTER_API_KEY:
-            return response_structure(
-                status.HTTP_200_OK, True, "OK", {"response": ChatbotConstants.FALLBACK_NO_KEY}
-            )
-
-        return response_structure(
-            status.HTTP_200_OK, True, "OK", {"response": ChatbotConstants.SERVER_ERROR}
-        )
+        # 3. Graceful offline knowledge assistant fallback
+        fallback_reply = ChatbotController._get_fallback_knowledge_response(payload.message)
+        return response_structure(status.HTTP_200_OK, True, "OK", {"response": fallback_reply})
 
