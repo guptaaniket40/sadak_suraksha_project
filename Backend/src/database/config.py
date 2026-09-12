@@ -32,7 +32,7 @@ class Config:
     JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
     JWT_EXPIRATION_MINUTES = int(os.getenv("JWT_EXPIRATION_MINUTES", 1440))
 
-    BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:5000")
+    BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
 
     OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
     OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "tngtech/deepseek-r1t2-chimera:free")

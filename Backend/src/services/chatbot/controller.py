@@ -18,17 +18,19 @@ class ChatbotController:
 
     @staticmethod
     async def _call_gemini(message: str, api_key: str) -> str:
-        models = ["gemini-2.0-flash", "gemini-1.5-flash"]
+        clean_key = api_key.strip().strip('"').strip("'")
+        if not clean_key:
+            return ""
+
+        models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-pro"]
         for model in models:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={clean_key}"
             payload = {
-                "system_instruction": {
-                    "parts": [{"text": SYSTEM_PROMPT}]
-                },
                 "contents": [
                     {
-                        "role": "user",
-                        "parts": [{"text": message}]
+                        "parts": [
+                            {"text": f"{SYSTEM_PROMPT}\n\nUser Question: {message}"}
+                        ]
                     }
                 ],
                 "generationConfig": {
@@ -49,8 +51,10 @@ class ChatbotController:
                                 text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
                                 if text:
                                     return text
+                    else:
+                        print(f"[Chatbot] Gemini API error ({model}): {resp.status_code} - {resp.text}")
             except Exception as e:
-                print(f"Gemini API error ({model}): {e}")
+                print(f"[Chatbot] Gemini request exception ({model}): {e}")
                 continue
         return ""
 
