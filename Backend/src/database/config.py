@@ -38,6 +38,8 @@ class Config:
     OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "tngtech/deepseek-r1t2-chimera:free")
     OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+
 
 class AllEnum:
     class RoleEnum(str, Enum):
